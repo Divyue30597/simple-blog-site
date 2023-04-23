@@ -247,3 +247,49 @@ If you do not need to pre-render the data, you can also use the following strate
 
 - Statically generate (pre-render) parts of the page that do not require external data.
 - When the page loads, fetch external data from the client using JavaScript and populate the remaining parts.
+
+## Statically generate pages with dynamic Routes
+
+Page path depends upon the external path in case of data coming from external source. Using dynamic URL concept, next.js allows to statically generate pages with paths that depend on the external data.
+
+- `path/<id>` -> path format.
+- export `getStaticPaths` from the Layout page and return the list of id from this page.
+- we need to implement `getStaticProps`, to fetch the necessary data with given id.
+
+```js
+import Layout from "../../components/layout";
+
+export default function Post() {
+  return <Layout>...</Layout>;
+}
+
+export async function getStaticPaths() {
+  // Return a list of possible value for id
+  return {
+    Paths,
+    fallback: false,
+  };
+}
+
+export async function getStaticProps({ params }) {
+  // Fetch necessary data for the blog post using params.id
+}
+```
+
+### Fallback in `getStaticPaths`
+
+`fallback: false`:
+
+- returns **404** page, if any path is not returned by `getStaticPath`
+
+`fallback:true`:
+
+- paths returned by `getStaticPath` will be rendered to HTML at the build time.
+- Paths not generated at the build time will not throw 404 page. Next.js will serve a “fallback” version of the page on the first request to such a path.
+- In the background, Next.js will statically generate the requested path. Subsequent requests to the same path will serve the generated page, just like other pages pre-rendered at build time.
+
+`fallback: blocking`:
+
+- new paths will be server-side rendered with getStaticProps, and cached for future requests so it only happens once per path.
+
+[Read-more about dynamic-routes](https://nextjs.org/learn/basics/dynamic-routes/dynamic-routes-details)
